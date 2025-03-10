@@ -1,0 +1,64 @@
+#!/bin/bash
+
+usage () {
+    local ret=$1
+    echo "usage: 1p-stage-key KEY-NAME"
+    exit ${ret}
+}
+
+TEMP=$(getopt -o 'hp' --long 'public-key,help' -n '1p-stage-key' -- "$@")
+if [ $? -ne 0 ]; then
+        echo 'Terminating...' >&2
+        exit 1
+fi
+eval set -- "$TEMP"
+unset TEMP
+
+print_public_key=
+while true; do
+    case "$1" in
+	'-p' | '--public-key')
+	    print_public_key="true"
+	    shift
+	    continue
+	    ;;
+	'-h' | '--help')
+	    usage 0
+	    break
+	    ;;
+	'--')
+	    shift
+	    break
+	    ;;
+	*)
+	    usage 1
+	    break
+	    ;;
+    esac
+done
+key="$1"
+if test -z ${key} ; then
+    usage 1
+fi
+
+stage="${TMPDIR}1p-stage-key"
+mkdir -p ${stage}
+
+if test ! -r "${stage}/${key}.public" -o ! -r "${stage}/${key}" ; then
+    ITEM=$(op item get age-org --format json --fields label=public_key,private_key)
+    echo ${ITEM} | jq '.[] | select(.id == "public_key") | .value' | xargs -- printf "%s\n" > "${stage}/${key}.public"
+    echo ${ITEM} | jq '.[] | select(.id == "private_key") | .ssh_formats.openssh.value' | xargs -- printf "%b" > "${stage}/${key}"
+fi
+
+if test -r "${stage}/${key}.public" -a "${print_public_key}" = "true" ; then
+    cat ${stage}/${key}.public
+    exit 0
+fi
+
+if test -r "${stage}/${key}" ; then
+    echo ${stage}/${key}.public
+    exit 0
+fi
+
+
+    
