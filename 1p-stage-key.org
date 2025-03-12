@@ -1,0 +1,18 @@
+#+TITLE: 1p-stage-key
+#+FILETAGS: :utility:1password:
+* Pre-requisites
+
+  `1p-stage-key` relies on
+
+  - 1password CLI `op`, and
+  - GNU `getopt`.
+** 1password CLI `op`
+
+   See [[https://developer.1password.com/docs/cli/get-started/][the 1password CLI webpage]].
+** GNU `getopt`
+
+   On macos install with homebrew:
+   #+begin_src shell
+brew install gnu-getopt
+   #+end_src
+   and ensure that the `gnu-getopt/bin` path comes early in your `$PATH`.

@@ -44,19 +44,22 @@ fi
 stage="${TMPDIR}1p-stage-key"
 mkdir -p ${stage}
 
+public_key="${stage}/${key}.public"
+private_key="${stage}/${key}"
+
 if test ! -r "${stage}/${key}.public" -o ! -r "${stage}/${key}" ; then
     ITEM=$(op item get age-org --format json --fields label=public_key,private_key)
-    echo ${ITEM} | jq '.[] | select(.id == "public_key") | .value' | xargs -- printf "%s\n" > "${stage}/${key}.public"
-    echo ${ITEM} | jq '.[] | select(.id == "private_key") | .ssh_formats.openssh.value' | xargs -- printf "%b" > "${stage}/${key}"
+    echo ${ITEM} | jq '.[] | select(.id == "public_key") | .value' | xargs -- printf "%s\n" > "${public_key}"
+    echo ${ITEM} | jq '.[] | select(.id == "private_key") | .ssh_formats.openssh.value' | xargs -- printf "%b" > "${private_key}"
 fi
 
 if test -r "${stage}/${key}.public" -a "${print_public_key}" = "true" ; then
-    cat ${stage}/${key}.public
+    cat ${public_key}
     exit 0
 fi
 
 if test -r "${stage}/${key}" ; then
-    echo ${stage}/${key}.public
+    echo ${private_key}
     exit 0
 fi
 
