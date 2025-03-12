@@ -1,12 +1,28 @@
 #!/bin/bash
 
+# gnu-getopt || die
+GETOPT=""
+for g in $(which getopt) "/usr/bin/getopt" "/usr/local/opt/gnu-getopt/bin/getopt" ; do
+    if ${g} -V | grep -e '--' > /dev/null; then
+	# not gnu-getopt, next
+	continue
+    fi
+    GETOPT=${g}
+done
+if test -z "${GETOPT}" ; then
+    # panic stations: no real getopt :-(
+    echo "we need gnu-getopt to run, which we couldn't find."
+    echo "on macos: try \"brew install gnu-getop\""
+    exit 1
+fi
+
 usage () {
     local ret=$1
     echo "usage: 1p-stage-key KEY-NAME"
     exit ${ret}
 }
 
-TEMP=$(getopt -o 'hp' --long 'public-key,help' -n '1p-stage-key' -- "$@")
+TEMP=$(${GETOPT} -o 'hp' --long 'public-key,help' -n '1p-stage-key' -- "$@")
 if [ $? -ne 0 ]; then
         echo 'Terminating...' >&2
         exit 1
